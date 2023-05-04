@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bangumi User Hover Panel
 // @namespace    https://github.com/shadowdreamer/jioben/tree/master/bangumi/
-// @version      0.4.1
+// @version      0.4.2
 // @description  fork of https://bgm.tv/dev/app/953. Display a hover panel when mouse hover on user link.
 // @author       cureDovahkiin + CryoVit
 // @match        https://bangumi.tv/*
@@ -184,7 +184,7 @@
                 $(this).after(layout).mouseout(function () {
                     timer = setTimeout(() => {
                         removeLayout()
-                    }, 200);
+                    }, 300);
                 })
                 $(layout).hover(function () {
                     clearTimeout(timer)
@@ -307,6 +307,7 @@
         .shinkuro-text {
             position: absolute;
             width: 100%;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
