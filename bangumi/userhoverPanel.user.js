@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bangumi User Hover Panel
 // @namespace    https://github.com/shadowdreamer/jioben/tree/master/bangumi/
-// @version      0.4.2
+// @version      0.4.3
 // @description  fork of https://bgm.tv/dev/app/953. Display a hover panel when mouse hover on user link.
 // @author       cureDovahkiin + CryoVit
 // @match        https://bangumi.tv/*
@@ -220,7 +220,7 @@
         }
         .user-hover {
             position: absolute;
-            width: 400px;
+            width: 412px;
             height: 200px;
             min-height: 200px;
             background: var(--bg-color);
@@ -344,8 +344,9 @@
             margin-bottom: 8px;
             background: #6eb76e;
             color: white;
-            padding: 0px 8px;
+            padding: 1px 8px;
             border-radius: 5px;
+            margin-left:10px;
         }
         span.my-friend-fail{
             display: inline-block;
@@ -353,8 +354,9 @@
             margin-bottom: 8px;
             background: red;
             color: white;
-            padding: 0px 8px;
+            padding: 1px 8px;
             border-radius: 5px;
+            margin-left:10px;
         }
 
         .lds-roller {
