@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Bangumi User Floating Panel
-// @namespace    https://github.com/CryoVit/bangumi-script/
+// @name         Bangumi User Hover Panel
+// @namespace    https://github.com/shadowdreamer/jioben/tree/master/bangumi/
 // @version      0.4.1
-// @description  fork of https://bgm.tv/dev/app/953
+// @description  fork of https://bgm.tv/dev/app/953. Display a hover panel when mouse hover on user link.
 // @author       cureDovahkiin + CryoVit
 // @match        https://bangumi.tv/*
 // @match        https://bgm.tv/*
