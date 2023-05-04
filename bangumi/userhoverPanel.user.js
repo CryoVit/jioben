@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bangumi User Floating Panel
-// @namespace    https://github.com/CryoVit/jioben/tree/master/bangumi/
-// @version      0.4
+// @namespace    https://github.com/CryoVit/bangumi-script/
+// @version      0.4.1
 // @description  fork of https://bgm.tv/dev/app/953
 // @author       cureDovahkiin + CryoVit
 // @match        https://bangumi.tv/*
@@ -307,6 +307,9 @@
         .shinkuro-text {
             position: absolute;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .shinkuro-text span {
             color: var(--text-color) !important;
@@ -321,9 +324,7 @@
             margin-left: 10px;
         }
         .shinkuro-text span:nth-of-type(2) {
-            float: right;
             margin-right: 26px;
-            margin-top: 4px;
         }
         a.hover-panel-btn {
             display: inline-block;
