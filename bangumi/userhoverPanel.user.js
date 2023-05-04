@@ -223,6 +223,7 @@
         .user-hover {
             position: absolute;
             width: 412px;
+            width: 412px;
             height: 200px;
             min-height: 200px;
             background: var(--bg-color);
@@ -347,7 +348,9 @@
             background: #6eb76e;
             color: white;
             padding: 1px 8px;
+            padding: 1px 8px;
             border-radius: 5px;
+            margin-left:10px;
             margin-left:10px;
         }
         span.my-friend-fail{
@@ -357,7 +360,9 @@
             background: red;
             color: white;
             padding: 1px 8px;
+            padding: 1px 8px;
             border-radius: 5px;
+            margin-left:10px;
             margin-left:10px;
         }
 
