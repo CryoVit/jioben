@@ -1,15 +1,20 @@
 // ==UserScript==
-// @name         bangumi鼠标移入显示用户信息悬浮框
-// @namespace    https://github.com/shadowdreamer/jioben/tree/master/bangumi
-// @version      0.3
-// @description   
-// @author       cureDovahkiin
-// @include      /^https?://(bgm\.tv|bangumi\.tv|chii\.in)\/.*
+// @name         Bangumi User Floating Panel
+// @namespace    https://github.com/CryoVit/jioben/tree/master/bangumi/
+// @version      0.4
+// @description  fork of https://bgm.tv/dev/app/953
+// @author       cureDovahkiin + CryoVit
+// @match        https://bangumi.tv/*
+// @match        https://bgm.tv/*
+// @match        https://chii.in/*
+// @icon         https://bgm.tv/img/favicon.ico
+// @grant        none
+// @license      MIT
 // ==/UserScript==
 
 (function () {
     let locker = false
-    $('[href*="/user/"].l,[href*="/user/"].avatar,#pm_sidebar a[onclick^="AddMSG"]').each(function () {
+    $('[href*="/user/"],[href*="/user/"].l,[href*="/user/"].avatar,#pm_sidebar a[onclick^="AddMSG"]').each(function () {
         let timer = null
         $(this).hover(function () {
             timer = setTimeout(() => {
@@ -23,7 +28,6 @@
                     $(layout).addClass('fix-avatar-hover')
                 }
                 layout.innerHTML = `<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>`
-                //...
                 const userData = {}
                 if (this.onclick) {
                     userData.id = this.onclick.toString().split("'")[1]
@@ -53,6 +57,11 @@
                                 userData.joinDate = /Bangumi<\/span> <span class="tip">([^<]*)<\/span>/.exec(e)[1]
                                 userData.lastEvent = /<small class="time">([^<]*)<\/small><\/li>/.exec(e)
                                 userData.watch = Array.from(e.match(/<a href="\/anime\/list[^>=]*>([0-9]{1,4}[^<]*)/g) || [], el => />([0-9]{1,5}.*)/.exec(el)[1])
+                                userData.watch = userData.watch.map(el => el.split('部'))
+                                userData.stats = /<div class="gridStats">([\s\S]*)<\/div>/.exec(e)[1]
+                                userData.stats = Array.from(userData.stats.match(/<div[^>]*>([\s\S]*?)<\/div>/g).slice(0, 6), el => /<div[^>]*>([\s\S]*?)<\/div>/.exec(el)[1])
+                                userData.stats = userData.stats.map(el => Array.from(el.match(/<span[^>]*>([\s\S]*?)<\/span>/g), el => /<span[^>]*>([\s\S]*?)<\/span>/.exec(el)[1]))
+                                // console.log(userData)
                                 r()
                             },
                             error: () => {
@@ -96,16 +105,30 @@
                             </div>
                             `: ''
                         }                
-                        <div class='user-watch'>
-                          ${(function () {
-                            let tmp = ''
-                            userData.watch.forEach(el => {
-                                tmp += `<span>${el}</span>`
-                            })
-                            return tmp
-                        })()}
+                        <div class='user-stats'>
+                            ${(function () {
+                                const watchStates = ['在看', '看过', '想看', '搁置', '抛弃'];
+                                let idx = 0;
+                                let html = '<div class="stats-odd">'
+                                for (let i = 0; i < 5; i++) {
+                                    if (idx >= userData.watch.length || userData.watch[idx][1] != watchStates[i]) {
+                                        html += `<span>${watchStates[i]} <strong>0</strong></span>`
+                                    } else {
+                                        html += `<span>${watchStates[i]} <strong>${userData.watch[idx][0]}</strong></span>`
+                                        idx++
+                                    }
+                                }
+                                html += '</div><div class="stats-even">'
+                                for (let i = 0; i < 6; i++) {
+                                    if (i == 2) {
+                                        continue
+                                    }
+                                    html += `<span>${userData.stats[i][1]} <strong>${userData.stats[i][0]}</strong></span>`
+                                }
+                                return html + '</div>'
+                            })()}
                         </div>
-                        <span class='user-lastevent'>Last@${userData.lastEvent ? userData.lastEvent[1] : ''}</span>
+                        <span class='user-lastevent'>Last @ ${userData.lastEvent ? userData.lastEvent[1] : ''}</span>
                         <a class = 'hover-panel-btn' href="${userData.message}" target="_blank">发送短信</a>
                         <span id="panel-friend">
                         ${ userData.addFriend ? `
@@ -119,7 +142,7 @@
                     $(layout).addClass('dataready')
                     $('#PanelconnectFrd').click(function () {
                         $('#panel-friend').html(`<span class='my-friend'>正在添加...</span>`)
-                        $("#robot").fadeIn(500);
+                        $("#robot").fadeIn(500)
                         $("#robot_balloon").html(AJAXtip['wait'] + AJAXtip['addingFrd'])
                         $.ajax({
                             type: "GET",
@@ -169,7 +192,7 @@
                     removeLayout()
                 })
                 return false
-            }, 300)
+            }, 500)
         },
             function () {
                 clearTimeout(timer)
@@ -181,15 +204,32 @@
     const heads = document.getElementsByTagName("head");
     style.setAttribute("type", "text/css");
     style.innerHTML = `
+        :root {
+            --bg-color: #fff;
+            --text-color: #010101;
+            --bg-pink: #fce9e9;
+            --bg-sky: #c2e1fc;
+            --box-shadow: #ddd;
+        }
+        [data-theme='dark'] {
+            --bg-color: #2d2e2f;
+            --text-color: #f7f7f7;
+            --bg-pink: #3c3c3c;
+            --bg-sky: #3c3c3c;
+            --box-shadow: #6e6e6e;
+        }
         .user-hover {
             position: absolute;
-            background: white;
-            box-shadow: 0px 0px 4px 1px #ddd;
+            width: 400px;
+            height: 200px;
+            min-height: 200px;
+            background: var(--bg-color);
+            box-shadow: 0px 0px 4px 1px var(--box-shadow);
             transition: all .2s ease-in;
             transform: translate(0,6px);
             font-size: 12px;
             z-index:999;
-            color:#010101
+            color: var(--text-color);
         }
         .fix-avatar-hover{
             transform: translate(45px,20px)
@@ -201,7 +241,10 @@
             text-align: left;
         }
         span.user-lastevent {
-            color: #f67070;
+            margin-top: 3px;
+            display: inline-block;
+            vertical-align: top;
+            color: gray !important;
         }
         div.dataready img {
             height: 75px;
@@ -221,49 +264,58 @@
         .user-info .user-joindate {
             background-color: #f09199;
             display: inline-block;
-            color: white;
+            color: #f7f7f7;
             border-radius: 10px;
             padding: 0 10px;
-            margin: 8px 4px 3px 0px;
+            margin: 8px 4px 3px 0;
         }
         .user-info .user-id{
             font-size: 12px;
             font-weight:normal;
-            color:#ec5c68
+            color: #ec5c68;
+            color: gray !important;
         }
         .user-info .user-sign {
             word-break: break-all;
+            margin-top: 3px;
         }
-        .user-watch {
+        .user-stats {
             padding: 10px 0px 5px;
             margin-bottom: 10px;
         }
-        .user-watch span {
+        .user-stats span {
             display: inline-block;
-            margin-right: 3px;
-            padding: 0px 4px;
+            padding: 4px;
+            width: 19%;
+            box-sizing: border-box;
             border-left: 4px solid #f09199;
-            background-color: #fce9e9;
+            background-color: var(--bg-pink) !important;
+            color: var(--text-color) !important;
+            margin: 0 1% 1% 0;
         }
-        .user-watch span:last-of-type {
-            margin-right: 0;
+        .stats-even span {
+            border-left: 4px solid #369cf8;
+            background-color: var(--bg-sky) !important;
         }
         .shinkuro {
             width: 100%;
             height: 20px;
-            background-color: #fce9e9;
+            background-color: var(--bg-sky) !important;
             line-height: 20px;
+            border-radius: 10px;
         }
         .shinkuro-text {
             position: absolute;
             width: 100%;
         }
+        .shinkuro-text span {
+            color: var(--text-color) !important;
+        }
         .shinkuroritsu {
             height: 20px;
             float: left;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            background: linear-gradient(to right, #f9a9a9 0%,#fb788f 100%);
+            border-radius: 10px;
+            background: linear-gradient(to right, #9acdfb 0%,#4aa5f8 100%);
         }
         .shinkuro-text span:nth-of-type(1) {
             margin-left: 10px;
@@ -271,6 +323,7 @@
         .shinkuro-text span:nth-of-type(2) {
             float: right;
             margin-right: 26px;
+            margin-top: 4px;
         }
         a.hover-panel-btn {
             display: inline-block;
@@ -278,14 +331,10 @@
             margin-bottom: 8px;
             background: #f09199;
             color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
+            padding: 1px 8px;
+            border-radius: 5px;
             margin-left:10px;
             transition: all .2s ease-in;
-        }
-        a.hover-panel-btn:hover{
-            background: #b4696f;
-            color: white;
         }
         span.my-friend{
             display: inline-block;
@@ -293,8 +342,8 @@
             margin-bottom: 8px;
             background: #6eb76e;
             color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
+            padding: 0px 8px;
+            border-radius: 5px;
         }
         span.my-friend-fail{
             display: inline-block;
@@ -302,8 +351,8 @@
             margin-bottom: 8px;
             background: red;
             color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
+            padding: 0px 8px;
+            border-radius: 5px;
         }
 
         .lds-roller {
@@ -312,12 +361,12 @@
             width: 64px;
             height: 64px;
             margin:10px 20px
-          }
-          .lds-roller div {
+        }
+        .lds-roller div {
             animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
             transform-origin: 32px 32px;
-          }
-          .lds-roller div:after {
+        }
+        .lds-roller div:after {
             content: " ";
             display: block;
             position: absolute;
@@ -326,72 +375,72 @@
             border-radius: 50%;
             background: #f09199;
             margin: -3px 0 0 -3px;
-          }
-          .lds-roller div:nth-child(1) {
+        }
+        .lds-roller div:nth-child(1) {
             animation-delay: -0.036s;
-          }
-          .lds-roller div:nth-child(1):after {
+        }
+        .lds-roller div:nth-child(1):after {
             top: 50px;
             left: 50px;
-          }
-          .lds-roller div:nth-child(2) {
+        }
+        .lds-roller div:nth-child(2) {
             animation-delay: -0.072s;
-          }
-          .lds-roller div:nth-child(2):after {
+        }
+        .lds-roller div:nth-child(2):after {
             top: 54px;
             left: 45px;
-          }
-          .lds-roller div:nth-child(3) {
+        }
+        .lds-roller div:nth-child(3) {
             animation-delay: -0.108s;
-          }
-          .lds-roller div:nth-child(3):after {
+        }
+        .lds-roller div:nth-child(3):after {
             top: 57px;
             left: 39px;
-          }
-          .lds-roller div:nth-child(4) {
+        }
+        .lds-roller div:nth-child(4) {
             animation-delay: -0.144s;
-          }
-          .lds-roller div:nth-child(4):after {
+        }
+        .lds-roller div:nth-child(4):after {
             top: 58px;
             left: 32px;
-          }
-          .lds-roller div:nth-child(5) {
+        }
+        .lds-roller div:nth-child(5) {
             animation-delay: -0.18s;
-          }
-          .lds-roller div:nth-child(5):after {
+        }
+        .lds-roller div:nth-child(5):after {
             top: 57px;
             left: 25px;
-          }
-          .lds-roller div:nth-child(6) {
+        }
+        .lds-roller div:nth-child(6) {
             animation-delay: -0.216s;
-          }
-          .lds-roller div:nth-child(6):after {
+        }
+        .lds-roller div:nth-child(6):after {
             top: 54px;
             left: 19px;
-          }
-          .lds-roller div:nth-child(7) {
+        }
+        .lds-roller div:nth-child(7) {
             animation-delay: -0.252s;
-          }
-          .lds-roller div:nth-child(7):after {
+        }
+        .lds-roller div:nth-child(7):after {
             top: 50px;
             left: 14px;
-          }
-          .lds-roller div:nth-child(8) {
+        }
+        .lds-roller div:nth-child(8) {
             animation-delay: -0.288s;
-          }
-          .lds-roller div:nth-child(8):after {
+        }
+        .lds-roller div:nth-child(8):after {
             top: 45px;
             left: 10px;
-          }
-          @keyframes lds-roller {
+        }
+        @keyframes lds-roller {
             0% {
-              transform: rotate(0deg);
+                transform: rotate(0deg);
             }
             100% {
-              transform: rotate(360deg);
+                transform: rotate(360deg);
             }
-          }
-          
+        }
+        
         #comment_list div.sub_reply_collapse {
             opacity: 1;
         }
